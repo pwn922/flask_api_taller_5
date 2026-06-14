@@ -1,0 +1,23 @@
+# Docker compose
+docker compose up -d
+
+# Install
+poetry env activate
+poetry install
+
+# Extra
+poetry add <package>
+poetry remove <package>
+poetry update <package>
+poetry env remove --all
+poetry cache clear --all
+poetry add ruff@latest --group dev
+poetry sync
+poetry add ruff --group dev
+
+# Run
+poetry run uvicorn app.app:create_app --reload --factory
+
+# Redis (Docker Exec)
+redis-cli -h 127.0.0.1 -p 6379
+> keys *
