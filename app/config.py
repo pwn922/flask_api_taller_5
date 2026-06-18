@@ -20,6 +20,9 @@ class BaseConfig:
     MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017/sensor_db")
     MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", "sensor_db")
 
+    ALERT_TEMP_MAX = float(os.environ.get("ALERT_TEMP_MAX", "35.0"))
+    ALERT_WATER_MIN = float(os.environ.get("ALERT_WATER_MIN", "20.0"))
+
 
 class DevelopmentConfig(BaseConfig):
     pass

@@ -9,7 +9,7 @@ from app import config
 
 class RedisCache:
     def __init__(self):
-        self._client: redis.Redis | None
+        self._client: redis.Redis | None = None
 
     @property
     def client(self) -> redis.Redis:
