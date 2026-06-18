@@ -3,6 +3,7 @@ import logging
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
+from app.sensor.application.evaluate_alerts_use_case import EvaluateAlertsUseCase
 from app.sensor.application.register_sensor_data import RegisterSensorDataUseCase
 from app.sensor.infrastructure.mongodb.sensor_repository import MongoSensorRepository
 from app.sensor.presentation.connection_manager import manager
@@ -34,6 +35,14 @@ async def sensor_data_websocket(websocket: WebSocket):
             )
 
             await manager.broadcast(reading.to_dict())
+
+            alerts_use_case = EvaluateAlertsUseCase()
+            alerts = alerts_use_case.execute(
+                temperature=reading.temperature,
+                water_level=reading.water_level,
+            )
+            for alert in alerts:
+                await manager.broadcast(alert)
 
     except WebSocketDisconnect:
         logger.info("Client disconnected")

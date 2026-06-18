@@ -34,3 +34,9 @@ class SensorRepository(ABC):
     @abstractmethod
     async def get_latest(self, device_id: str, limit: int = 10) -> list[SensorReading]:
         pass
+
+    @abstractmethod
+    async def get_hourly_averages(
+        self, device_id: str, hours: int = 24
+    ) -> dict | None:
+        pass
