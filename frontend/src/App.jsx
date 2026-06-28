@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSensorSocket } from "./hooks/useSensorSocket";
+import { RealtimeChart } from "./components/RealtimeChart";
 import "./App.css";
 import {
   getLatestSensorState,
@@ -16,6 +17,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const { socketStatus, realtimeData, realtimeAlerts } = useSensorSocket();
+  const [realtimeSeries, setRealtimeSeries] = useState([]);
 
   async function loadSensorData() {
     try {
@@ -30,6 +32,13 @@ function App() {
 
       setLatest(latestResponse);
       setHistory(historyResponse.data ?? []);
+      setRealtimeSeries((currentSeries) => {
+  if (currentSeries.length > 0) {
+    return currentSeries;
+  }
+
+  return [...(historyResponse.data ?? [])].reverse().slice(-12);
+});
       setAverages(averagesResponse);
     } catch (err) {
       setError("No se pudieron cargar los datos del sensor.");
@@ -50,6 +59,23 @@ function App() {
   }, []);
 
   const latestData = realtimeData ?? latest?.data;
+  useEffect(() => {
+  if (!realtimeData) {
+    return;
+  }
+
+  setRealtimeSeries((currentSeries) => {
+    const alreadyExists = currentSeries.some(
+      (item) => item.id === realtimeData.id
+    );
+
+    if (alreadyExists) {
+      return currentSeries;
+    }
+
+    return [...currentSeries, realtimeData].slice(-12);
+  });
+}, [realtimeData]);
   const isOnline = latest?.online === true;
 
   return (
@@ -105,6 +131,7 @@ function App() {
           </strong>
         </article>
       </section>
+      <RealtimeChart data={realtimeSeries} />
       {realtimeAlerts.length > 0 && (
   <section className="alerts">
     <h2>Alertas en tiempo real</h2>
