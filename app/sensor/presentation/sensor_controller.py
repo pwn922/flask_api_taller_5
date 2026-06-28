@@ -11,6 +11,26 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/sensor", tags=["sensor"])
 
+@router.get("/{device_id}/latest")
+async def get_latest_state(device_id: str):
+    cache = get_redis_cache()
+    latest = await cache.get(f"latest:{device_id}")
+
+    if latest is None:
+        return {
+            "device_id": device_id,
+            "online": False,
+            "data": None,
+            "cached": False,
+            "message": "No recent sensor state found",
+        }
+
+    return {
+        "device_id": device_id,
+        "online": True,
+        "data": latest.get("data"),
+        "cached": True,
+    }
 
 @router.get("/{device_id}/history")
 async def get_history(
