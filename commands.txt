@@ -21,3 +21,33 @@ poetry run uvicorn app.app:create_app --reload --factory
 # Redis (Docker Exec)
 redis-cli -h 127.0.0.1 -p 6379
 > keys *
+
+# ── Cloudflare Tunnel ──────────────────────────────────────────────────
+
+# Quick Tunnel (sin dominio, URL aleatoria, ideal para pruebas)
+# 1. Levantar infraestructura
+docker compose up -d
+# 2. Iniciar backend
+poetry run uvicorn app.app:app --reload --port 8000
+# 3. En otra terminal, abrir túnel efímero
+cloudflared tunnel --url http://localhost:8000
+# → Usar la URL que aparezca (ej: https://rana-llama-123.trycloudflare.com)
+
+# Managed Tunnel (con dominio propio, para entrega)
+cloudflared tunnel login
+cloudflared tunnel create taller5-tunnel
+cloudflared tunnel route dns taller5-tunnel sensor-api.midominio.com
+echo "CF_TUNNEL_TOKEN=<token_del_json>" >> .env
+echo "CF_TUNNEL_DOMAIN=https://sensor-api.midominio.com" >> .env
+docker compose up -d
+poetry run uvicorn app.app:app --reload --port 8000
+
+# Probar envío de datos del ESP32
+curl -X POST http://localhost:8000/sensor-data \
+  -H "Content-Type: application/json" \
+  -d '{"deviceId":"esp32_1","temperatura":28.50,"humedad":65.00,"nivelAgua":3}'
+
+# Probar envío a través del túnel (reemplazar URL)
+curl -X POST https://sensor-api.midominio.com/sensor-data \
+  -H "Content-Type: application/json" \
+  -d '{"deviceId":"esp32_1","temperatura":28.50,"humedad":65.00,"nivelAgua":3}'
