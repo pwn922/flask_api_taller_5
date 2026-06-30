@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 
-const WS_URL = "ws://localhost:8000/sensor-data";
+const WS_URL =
+  import.meta.env.VITE_WS_URL ?? "ws://localhost:8000/sensor-data";
 
-export function useSensorSocket() {
+export function useSensorSocket({ onSensorData } = {}) {
   const [socketStatus, setSocketStatus] = useState("disconnected");
-  const [realtimeData, setRealtimeData] = useState(null);
   const [realtimeAlerts, setRealtimeAlerts] = useState([]);
 
   useEffect(() => {
@@ -18,12 +18,14 @@ export function useSensorSocket() {
       const message = JSON.parse(event.data);
 
       if (message.type === "alert") {
-        setRealtimeAlerts((currentAlerts) => [message, ...currentAlerts].slice(0, 5));
+        setRealtimeAlerts((currentAlerts) =>
+          [message, ...currentAlerts].slice(0, 5)
+        );
         return;
       }
 
       if (message.device_id) {
-        setRealtimeData(message);
+        onSensorData?.(message);
       }
     };
 
@@ -38,11 +40,10 @@ export function useSensorSocket() {
     return () => {
       socket.close();
     };
-  }, []);
+  }, [onSensorData]);
 
   return {
     socketStatus,
-    realtimeData,
     realtimeAlerts,
   };
 }
