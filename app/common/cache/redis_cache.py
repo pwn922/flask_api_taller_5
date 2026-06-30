@@ -52,11 +52,11 @@ class RedisCache:
             if cursor == 0:
                 break
 
-    async def incr(self, key: str) -> int:
-        """
-        Incrementa un contador en Redis.
-        Si la key no existe, la crea con valor 1.
+    async def get_int(self, key: str) -> int | None:
+        value = await self.client.get(key)
+        if value is not None:
+            return int(value)
+        return None
 
-        Retorna el nuevo valor.
-        """
+    async def incr(self, key: str) -> int:
         return await self.client.incr(key)
