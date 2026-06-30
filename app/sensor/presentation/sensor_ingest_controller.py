@@ -1,11 +1,12 @@
 import logging
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Depends, status
 
-from app.common.dependencies import get_redis_cache
+from app.common.cache.redis_cache import RedisCache
+from app.common.dependencies import get_redis_cache, get_sensor_repository
 from app.sensor.application.evaluate_alerts_use_case import EvaluateAlertsUseCase
 from app.sensor.application.register_sensor_data import RegisterSensorDataUseCase
-from app.sensor.infrastructure.mongodb.sensor_repository import MongoSensorRepository
+from app.sensor.domain.sensor import SensorRepository
 from app.sensor.presentation.connection_manager import manager
 from app.sensor.presentation.schemas import SensorDataRequest
 
@@ -17,11 +18,13 @@ LATEST_STATE_TTL_SECONDS = 30
 
 
 @router.post("/sensor-data", status_code=status.HTTP_201_CREATED)
-async def ingest_sensor_data(payload: SensorDataRequest):
-    repo = MongoSensorRepository()
-    cache = get_redis_cache()
-
+async def ingest_sensor_data(
+    payload: SensorDataRequest,
+    repo: SensorRepository = Depends(get_sensor_repository),
+    cache: RedisCache = Depends(get_redis_cache),
+):
     register_use_case = RegisterSensorDataUseCase(repo)
+    alerts_use_case = EvaluateAlertsUseCase()
 
     reading = await register_use_case.execute(
         device_id=payload.device_id,
@@ -32,29 +35,37 @@ async def ingest_sensor_data(payload: SensorDataRequest):
 
     reading_data = reading.to_dict()
 
-    latest_key = f"latest:{reading.device_id}"
     await cache.set(
-        latest_key,
+        f"latest:{reading.device_id}",
         {"data": reading_data},
         ttl=LATEST_STATE_TTL_SECONDS,
     )
 
-    await cache.delete_pattern(f"history:{reading.device_id}:*")
-    await cache.delete_pattern(f"averages:{reading.device_id}:*")
+    await cache.incr(f"history_version:{reading.device_id}")
+    await cache.incr(f"averages_version:{reading.device_id}")
 
-    await manager.broadcast(reading_data)
+    await manager.broadcast(
+        {
+            "type": "reading",
+            "data": reading_data,
+        },
+    )
 
-    alerts_use_case = EvaluateAlertsUseCase()
     alerts = alerts_use_case.execute(
         temperature=reading.temperature,
         water_level=reading.water_level,
     )
 
-    for alert in alerts:
-        await manager.broadcast(alert)
+    if alerts:
+        await manager.broadcast(
+            {
+                "type": "alerts",
+                "data": alerts,
+            },
+        )
 
     logger.info(
-        "Sensor data ingested by POST | device=%s temp=%.1f hum=%.1f water=%.1f",
+        "Sensor data ingested | device=%s temp=%.1f hum=%.1f water=%.1f",
         reading.device_id,
         reading.temperature,
         reading.humidity,

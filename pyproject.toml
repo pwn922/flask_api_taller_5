@@ -53,3 +53,6 @@ ignore = ["E501", "S101"]
 minversion = "6.0"
 addopts = "-ra -q --cov=app --cov-report=html"
 testpaths = ["tests"]
+
+[tool.ruff.lint]
+ignore = ["B008"]

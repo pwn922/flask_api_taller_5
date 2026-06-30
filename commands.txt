@@ -1,6 +1,8 @@
 # Docker compose
 docker compose up -d
 
+python -m pip install --upgrade poetry
+
 # Install
 poetry env activate
 poetry install
@@ -14,6 +16,9 @@ poetry cache clear --all
 poetry add ruff@latest --group dev
 poetry sync
 poetry add ruff --group dev
+
+poetry env list
+Remove-Item -Recurse -Force "$env:LOCALAPPDATA\pypoetry\Cache\virtualenvs"
 
 # Run
 poetry run uvicorn app.app:create_app --reload --factory
@@ -51,3 +56,17 @@ curl -X POST http://localhost:8000/sensor-data \
 curl -X POST https://sensor-api.midominio.com/sensor-data \
   -H "Content-Type: application/json" \
   -d '{"deviceId":"esp32_1","temperatura":28.50,"humedad":65.00,"nivelAgua":3}'
+
+# Redis
+
+redis-cli
+
+latest:{device_id}
+GET latest:sensor01
+
+history:{device_id}
+GET history:esp32-001:10
+
+averages:{device_id}:{hours}
+GET averages:esp32-001:24
+esp32-001

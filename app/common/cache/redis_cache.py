@@ -51,3 +51,12 @@ class RedisCache:
                 await self.client.delete(*keys)
             if cursor == 0:
                 break
+
+    async def incr(self, key: str) -> int:
+        """
+        Incrementa un contador en Redis.
+        Si la key no existe, la crea con valor 1.
+
+        Retorna el nuevo valor.
+        """
+        return await self.client.incr(key)

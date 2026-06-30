@@ -9,8 +9,10 @@ from app.db.mongodb.database import MongoDBConnection
 from app.health.presentation.health_controller import router as health_router
 from app.middleware.http_logging import HTTPLoggingMiddleware
 from app.sensor.presentation.sensor_controller import router as sensor_router
+from app.sensor.presentation.sensor_ingest_controller import (
+    router as sensor_ingest_router,
+)
 from app.sensor.presentation.websocket_handler import router as ws_router
-from app.sensor.presentation.sensor_ingest_controller import router as sensor_ingest_router
 
 api_prefix = "/api"
 
@@ -54,7 +56,6 @@ def create_app() -> FastAPI:
     app.include_router(sensor_ingest_router)
     app.include_router(ws_router)
 
-    
     return app
 
 
