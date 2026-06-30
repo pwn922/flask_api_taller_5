@@ -76,6 +76,7 @@ async def sensor_data_websocket(
             alerts = alerts_use_case.execute(
                 temperature=reading.temperature,
                 water_level=reading.water_level,
+                device_id=reading.device_id,
             )
 
             await manager.broadcast(

@@ -10,6 +10,7 @@ class EvaluateAlertsUseCase:
         self,
         temperature: float,
         water_level: float,
+        device_id: str | None = None,
     ) -> list[dict]:
         alerts: list[dict] = []
         cfg = config.ActiveConfig
@@ -20,6 +21,7 @@ class EvaluateAlertsUseCase:
                     "type": "alert",
                     "severity": "danger",
                     "kind": "high_temperature",
+                    "device_id": device_id,
                     "message": f"Temperatura {temperature}°C supera el límite ({cfg.ALERT_TEMP_MAX}°C)",
                     "value": temperature,
                     "threshold": cfg.ALERT_TEMP_MAX,
@@ -37,6 +39,7 @@ class EvaluateAlertsUseCase:
                     "type": "alert",
                     "severity": "warning",
                     "kind": "low_water",
+                    "device_id": device_id,
                     "message": f"Nivel de agua {water_level}% está por debajo del mínimo ({cfg.ALERT_WATER_MIN}%)",
                     "value": water_level,
                     "threshold": cfg.ALERT_WATER_MIN,

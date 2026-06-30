@@ -47,6 +47,7 @@ async def ingest_sensor_data(
     alerts = alerts_use_case.execute(
         temperature=reading.temperature,
         water_level=reading.water_level,
+        device_id=reading.device_id,
     )
 
     await manager.broadcast(

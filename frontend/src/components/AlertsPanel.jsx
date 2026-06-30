@@ -86,6 +86,7 @@ export function AlertsPanel({ latestData, realtimeAlerts = [] }) {
         >
           <strong>{alert.kind}</strong>
           <span>{alert.message}</span>
+          {alert.device_id && <small>Dispositivo: {alert.device_id}</small>}
         </article>
       ))}
     </section>
