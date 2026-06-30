@@ -3,18 +3,20 @@ import { useCallback, useEffect, useState } from "react";
 import { useSensorSocket } from "./useSensorSocket";
 import {
   DEFAULT_DEVICE_ID,
+  getDevices,
   getLatestSensorState,
   getSensorHistory,
   getSensorAverages,
 } from "../services/sensorApi";
 
-const DEVICE_ID = DEFAULT_DEVICE_ID;
 const HISTORY_LIMIT = 10;
 const AVERAGES_HOURS = 24;
 const REFRESH_INTERVAL_MS = 10000;
 const REALTIME_SERIES_LIMIT = 12;
 
 export function useSensorDashboard() {
+  const [deviceId, setDeviceId] = useState(DEFAULT_DEVICE_ID);
+  const [devices, setDevices] = useState([]);
   const [latest, setLatest] = useState(null);
   const [lastRealtimeData, setLastRealtimeData] = useState(null);
   const [history, setHistory] = useState([]);
@@ -43,13 +45,24 @@ export function useSensorDashboard() {
     onSensorData: handleSensorData,
   });
 
+  const loadDevices = useCallback(async () => {
+    try {
+      const response = await getDevices();
+      setDevices(response.devices ?? []);
+    } catch (err) {
+      console.error("Error al cargar dispositivos:", err);
+    }
+  }, []);
+
   const loadSensorData = useCallback(async () => {
+    if (!deviceId) return;
+
     try {
       const [latestResponse, historyResponse, averagesResponse] =
         await Promise.all([
-          getLatestSensorState(DEVICE_ID),
-          getSensorHistory(DEVICE_ID, HISTORY_LIMIT),
-          getSensorAverages(DEVICE_ID, AVERAGES_HOURS),
+          getLatestSensorState(deviceId),
+          getSensorHistory(deviceId, HISTORY_LIMIT),
+          getSensorAverages(deviceId, AVERAGES_HOURS),
         ]);
 
       const historyData = historyResponse.data ?? [];
@@ -72,7 +85,18 @@ export function useSensorDashboard() {
     } finally {
       setLoading(false);
     }
+  }, [deviceId]);
+
+  const handleDeviceChange = useCallback((newDeviceId) => {
+    setDeviceId(newDeviceId);
+    setRealtimeSeries([]);
+    setLastRealtimeData(null);
+    setLoading(true);
   }, []);
+
+  useEffect(() => {
+    loadDevices();
+  }, [loadDevices]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -93,6 +117,8 @@ export function useSensorDashboard() {
   const isOnline = latest?.online === true;
 
   return {
+    deviceId,
+    devices,
     latestData,
     history,
     averages,
@@ -102,5 +128,6 @@ export function useSensorDashboard() {
     socketStatus,
     realtimeAlerts,
     realtimeSeries,
+    onDeviceChange: handleDeviceChange,
   };
 }

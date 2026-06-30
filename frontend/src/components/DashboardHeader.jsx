@@ -1,4 +1,12 @@
-export function DashboardHeader({ isOnline, socketStatus }) {
+import { DeviceSelector } from "./DeviceSelector";
+
+export function DashboardHeader({
+  isOnline,
+  socketStatus,
+  devices,
+  selectedDevice,
+  onDeviceChange,
+}) {
   return (
     <section className="hero">
       <div>
@@ -10,6 +18,14 @@ export function DashboardHeader({ isOnline, socketStatus }) {
       </div>
 
       <div className="status-group">
+        {devices.length > 0 && (
+          <DeviceSelector
+            devices={devices}
+            selectedDevice={selectedDevice}
+            onSelect={onDeviceChange}
+          />
+        )}
+
         <div className={`status ${isOnline ? "online" : "offline"}`}>
           {isOnline ? "Sensor online" : "Sensor sin datos recientes"}
         </div>

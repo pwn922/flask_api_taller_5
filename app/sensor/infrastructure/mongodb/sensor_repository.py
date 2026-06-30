@@ -41,6 +41,35 @@ class MongoSensorRepository(SensorRepository):
             async for doc in cursor
         ]
 
+    async def get_devices(self) -> list[dict]:
+        db = MongoDBConnection.get_db()
+        pipeline = [
+            {"$sort": {"timestamp": -1}},
+            {
+                "$group": {
+                    "_id": "$device_id",
+                    "last_timestamp": {"$first": "$timestamp"},
+                    "samples": {"$sum": 1},
+                },
+            },
+            {
+                "$project": {
+                    "_id": 0,
+                    "device_id": "$_id",
+                    "last_timestamp": {
+                        "$dateToString": {
+                            "format": "%Y-%m-%dT%H:%M:%S.%LZ",
+                            "date": "$last_timestamp",
+                        },
+                    },
+                    "samples": 1,
+                },
+            },
+            {"$sort": {"device_id": 1}},
+        ]
+        cursor = db[self.COLLECTION].aggregate(pipeline)
+        return await cursor.to_list(length=None)
+
     async def get_hourly_averages(self, device_id: str, hours: int = 24) -> dict | None:
         db = MongoDBConnection.get_db()
         since = datetime.now(timezone.utc) - timedelta(hours=hours)

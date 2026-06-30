@@ -70,3 +70,16 @@ GET history:esp32-001:10
 averages:{device_id}:{hours}
 GET averages:esp32-001:24
 esp32-001
+
+
+curl -X POST http://localhost:8000/sensor-data -H "Content-Type: application/json" -d "{\"deviceId\":\"esp32-001\",\"temperatura\":25.0,\"humedad\":60,\"nivelAgua\":80}"
+
+curl "http://localhost:8000/api/sensor/esp32-001/history?limit=5"
+
+curl "http://localhost:8000/api/sensor/esp32-001/history?limit=5"
+
+curl -X POST http://localhost:8000/sensor-data -H "Content-Type: application/json" -d "{\"deviceId\":\"esp32-001\",\"temperatura\":28.0,\"humedad\":55,\"nivelAgua\":75}"
+
+curl "http://localhost:8000/api/sensor/esp32-001/history?limit=5"
+
+curl "http://localhost:8000/api/sensor/esp32-001/history?limit=5"

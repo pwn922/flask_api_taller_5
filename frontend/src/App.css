@@ -53,6 +53,46 @@ h1 {
   white-space: nowrap;
 }
 
+.device-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.device-selector label {
+  color: #94a3b8;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.device-selector select {
+  background: rgba(15, 23, 42, 0.92);
+  color: #e2e8f0;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  min-width: 140px;
+}
+
+.device-selector select:hover {
+  border-color: rgba(148, 163, 184, 0.5);
+}
+
+.device-selector select:focus {
+  border-color: #38bdf8;
+}
+
+.device-selector select option {
+  background: #1e293b;
+  color: #e2e8f0;
+}
+
 .status.online {
   color: #bbf7d0;
   background: rgba(34, 197, 94, 0.15);

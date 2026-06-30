@@ -17,6 +17,10 @@ async function request(path) {
   return response.json();
 }
 
+export function getDevices() {
+  return request("/api/sensor/devices");
+}
+
 export function getLatestSensorState(deviceId = DEFAULT_DEVICE_ID) {
   return request(`/api/sensor/${deviceId}/latest`);
 }

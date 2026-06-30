@@ -11,6 +11,8 @@ import { useSensorDashboard } from "./hooks/useSensorDashboard";
 
 function App() {
   const {
+    deviceId,
+    devices,
     latestData,
     history,
     averages,
@@ -20,11 +22,18 @@ function App() {
     socketStatus,
     realtimeAlerts,
     realtimeSeries,
+    onDeviceChange,
   } = useSensorDashboard();
 
   return (
     <main className="dashboard">
-      <DashboardHeader isOnline={isOnline} socketStatus={socketStatus} />
+      <DashboardHeader
+        isOnline={isOnline}
+        socketStatus={socketStatus}
+        devices={devices}
+        selectedDevice={deviceId}
+        onDeviceChange={onDeviceChange}
+      />
 
       {loading && <p className="info">Cargando datos...</p>}
       {error && <p className="error">{error}</p>}

@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Query
 
 from app.common.cache.redis_cache import RedisCache
 from app.common.dependencies import get_redis_cache, get_sensor_repository
+from app.sensor.application.get_devices_use_case import GetDevicesUseCase
 from app.sensor.application.get_history_use_case import GetHistoryUseCase
 from app.sensor.application.get_hourly_averages_use_case import GetHourlyAveragesUseCase
 from app.sensor.domain.sensor import SensorRepository
@@ -11,6 +12,15 @@ from app.sensor.domain.sensor import SensorRepository
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/sensor", tags=["sensor"])
+
+
+@router.get("/devices")
+async def get_devices(
+    repo: SensorRepository = Depends(get_sensor_repository),
+):
+    use_case = GetDevicesUseCase(repo)
+    devices = await use_case.execute()
+    return {"devices": devices, "samples": len(devices)}
 
 
 @router.get("/{device_id}/latest")
