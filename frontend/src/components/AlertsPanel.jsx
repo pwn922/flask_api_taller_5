@@ -42,8 +42,9 @@ function getPanelStatusClass(alerts) {
   return "success";
 }
 
-export function AlertsPanel({ latestData }) {
+export function AlertsPanel({ latestData, realtimeAlerts = [] }) {
   const activeAlerts = buildMeasurementAlerts(latestData);
+  const allAlerts = realtimeAlerts.length > 0 ? realtimeAlerts : activeAlerts;
 
   if (!latestData) {
     return (
@@ -58,7 +59,7 @@ export function AlertsPanel({ latestData }) {
     );
   }
 
-  if (activeAlerts.length === 0) {
+  if (allAlerts.length === 0) {
     return (
       <section className="alerts success">
         <h2>Estado de mediciones en tiempo real</h2>
@@ -75,10 +76,10 @@ export function AlertsPanel({ latestData }) {
   }
 
   return (
-    <section className={`alerts ${getPanelStatusClass(activeAlerts)}`}>
+    <section className={`alerts ${getPanelStatusClass(allAlerts)}`}>
       <h2>Alertas en tiempo real</h2>
 
-      {activeAlerts.map((alert) => (
+      {allAlerts.map((alert) => (
         <article
           key={alert.kind}
           className={`alert ${alert.severity}`}

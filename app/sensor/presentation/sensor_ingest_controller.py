@@ -44,25 +44,18 @@ async def ingest_sensor_data(
     await cache.incr(f"history_version:{reading.device_id}")
     await cache.incr(f"averages_version:{reading.device_id}")
 
-    await manager.broadcast(
-        {
-            "type": "reading",
-            "data": reading_data,
-        },
-    )
-
     alerts = alerts_use_case.execute(
         temperature=reading.temperature,
         water_level=reading.water_level,
     )
 
-    if alerts:
-        await manager.broadcast(
-            {
-                "type": "alerts",
-                "data": alerts,
-            },
-        )
+    await manager.broadcast(
+        {
+            "type": "sensor_event",
+            "data": reading_data,
+            "alerts": alerts,
+        },
+    )
 
     logger.info(
         "Sensor data ingested | device=%s temp=%.1f hum=%.1f water=%.1f",

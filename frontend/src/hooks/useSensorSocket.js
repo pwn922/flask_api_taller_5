@@ -17,15 +17,17 @@ export function useSensorSocket({ onSensorData } = {}) {
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
 
-      if (message.type === "alert") {
-        setRealtimeAlerts((currentAlerts) =>
-          [message, ...currentAlerts].slice(0, 5)
-        );
-        return;
-      }
+      if (message.type === "sensor_event") {
+        if (message.data) {
+          onSensorData?.(message.data);
+        }
 
-      if (message.device_id) {
-        onSensorData?.(message);
+        if (message.alerts?.length > 0) {
+          setRealtimeAlerts((currentAlerts) =>
+            [...message.alerts, ...currentAlerts].slice(0, 5)
+          );
+        }
+        return;
       }
     };
 

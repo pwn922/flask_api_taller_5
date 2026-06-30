@@ -18,6 +18,7 @@ function App() {
     error,
     isOnline,
     socketStatus,
+    realtimeAlerts,
     realtimeSeries,
   } = useSensorDashboard();
 
@@ -30,7 +31,7 @@ function App() {
 
       <SensorCards latestData={latestData} />
 
-      <AlertsPanel latestData={latestData} />
+      <AlertsPanel latestData={latestData} realtimeAlerts={realtimeAlerts} />
 
       <RealtimeChart data={realtimeSeries} />
 
